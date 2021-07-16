@@ -12,6 +12,7 @@ const app = express();
 app.use(cors({ origin: 'https://mesto-dvspicin.nomoredomains.monster', credentials: true }));
 app.use(cookieParser());
 const bodyParser = require('body-parser');
+const NotFoundError = require('./errors/not-found-error');
 const router = require('./routes/index');
 const IncorrectDataError = require('./errors/incorrect-data-error');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
@@ -34,8 +35,8 @@ app.get('/crash-test', () => {
 app.use(router);
 
 app.use(errorLogger);
-app.use((req, res) => {
-  res.status(404).send({ message: 'Страница не найдена' });
+app.use(() => {
+  throw new NotFoundError('Страница не найдена');
 });
 
 app.use(errors());

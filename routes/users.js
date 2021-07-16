@@ -4,7 +4,9 @@ const {
   patchUser, getUserMe,
 } = require('../controllers/users');
 
+const { validatePatchUser } = require('../middlewares/validations');
+
 routeUsers.get('/me', getUserMe);
-routeUsers.patch('/me', patchUser);
+routeUsers.patch('/me', validatePatchUser, patchUser);
 
 module.exports = routeUsers;

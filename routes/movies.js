@@ -7,7 +7,7 @@ const {
 } = require('../controllers/movies');
 
 routeMovies.get('/', getMovies);
-routeMovies.patch('/', validateNewMovie, createMovie);
+routeMovies.post('/', validateNewMovie, createMovie);
 routeMovies.delete('/:movieId', deleteMovie);
 
 module.exports = routeMovies;

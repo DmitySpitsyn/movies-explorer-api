@@ -1,21 +1,12 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const validator = require('validator');
 const users = require('../models/user');
 const NotFoundError = require('../errors/not-found-error');
-const IncorrectDataError = require('../errors/incorrect-data-error');
 const IncorrectLoginPasswordError = require('../errors/incorrect-login-password');
+const ConflictDataError = require('../errors/conflict-data-error');
 
 const { NODE_ENV, JWT_SECRET } = process.env;
 const saltRounds = 10;
-
-function validatorFields(email, password) {
-  if ((!email) || (!password)) { throw new IncorrectDataError('Не заполнены обязательные поля'); }
-  if ((!(typeof (password) === 'string')) || (!(typeof (email) === 'string'))) { throw new IncorrectDataError('В одно из полей переданны некорректные данные'); }
-  if (!validator.isEmail(email)) {
-    throw new IncorrectDataError('Введеный почтовый адрес некоректен');
-  }
-}
 
 module.exports.getUserMe = (req, res, next) => {
   const { _id } = req.user;
@@ -31,7 +22,6 @@ module.exports.login = (req, res, next) => {
   const {
     email, password,
   } = req.body;
-  validatorFields(email, password);
   return users.findUserByCredentials(email, password)
     .then((user) => {
       const token = jwt.sign({ _id: user._id }, NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret');
@@ -52,8 +42,6 @@ module.exports.createUser = (req, res, next) => {
   const {
     name, email, password,
   } = req.body;
-  if (!name) { throw new IncorrectDataError('Не заполнены обязательные поля'); }
-  validatorFields(email, password);
   bcrypt.hash(password, saltRounds).then((hash) => users.create({
     name, email, password: hash,
   }))
@@ -63,10 +51,9 @@ module.exports.createUser = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'MongoError' && err.code === 11000) {
-        const error = new Error('Пользователь с такой почтой уже зарегистрирован');
-        error.statusCode = 409;
-        next(error);
+        throw new ConflictDataError('Пользователь с такой почтой уже зарегистрирован');
       }
+      throw err;
     })
     .catch(next);
 };
@@ -74,21 +61,16 @@ module.exports.createUser = (req, res, next) => {
 module.exports.patchUser = (req, res, next) => {
   const { name, email } = req.body;
   const owner = req.user._id;
-  users.findById(owner).then((user) => {
-    if (!user) { throw new NotFoundError('Пользователь по указанному _id не найден.'); }
-    if ((!name) || (!email)) { throw new IncorrectDataError('Не заполнены обязательные поля'); }
-    if (!validator.isEmail(email)) {
-      throw new IncorrectDataError('Введеный почтовый адрес некоректен');
-    }
+  users.findById(owner).then(() => {
     users.findOneAndUpdate({ _id: owner }, { $set: { name, email } },
-      { runValidators: true, new: true },
-      (err, item) => {
+      { runValidators: true, new: true })
+      .then((item) => { res.send(item); }).catch((err) => {
         if (err) {
-          const error = new Error('Ошибка валидации');
-          error.statusCode = 400;
-          next(error);
+          if (err.name === 'MongoError' && err.code === 11000) {
+            throw new ConflictDataError('Пользователь с такой почтой уже зарегистрирован');
+          }
         }
-        res.send(item);
-      });
+        throw err;
+      }).catch(next);
   }).catch(next);
 };

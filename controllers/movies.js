@@ -1,7 +1,7 @@
-const validator = require('validator');
 const movies = require('../models/movie');
 const IncorrectDataError = require('../errors/incorrect-data-error');
 const NotFoundError = require('../errors/not-found-error');
+const ForbiddenDataError = require('../errors/forbidden-data-error');
 
 module.exports.getMovies = (req, res, next) => {
   movies.find({})
@@ -37,16 +37,12 @@ module.exports.createMovie = (req, res, next) => {
 
 module.exports.deleteMovie = (req, res, next) => {
   const { movieId } = req.params;
-  return movies.findOne({ movieId }).then((movie) => {
+  return movies.findOne({ _id: movieId }).then((movie) => {
     if (movie) {
       if (movie.owner.toString() === req.user._id) {
-        res.status(200).send(movie);
-        movie.remove();
-        return;
+        return movie.remove().then(() => { res.status(200).send(movie); });
       }
-      const error = new Error('Нельзя удалить чужую карточку');
-      error.statusCode = 403;
-      next(error);
+      throw new ForbiddenDataError('Нельзя удалить чужую карточку');
     }
     throw new NotFoundError('Карточка по указанному _id не найдена.');
   }).catch(next);

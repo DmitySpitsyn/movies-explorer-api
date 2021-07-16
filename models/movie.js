@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const validator = require('validator');
 
 const movieSchema = new mongoose.Schema({
   country: {
@@ -24,14 +25,26 @@ const movieSchema = new mongoose.Schema({
   image: {
     type: String,
     required: true,
+    validate: {
+      validator: (v) => validator.isURL(v),
+      message: 'В поле image введена некоректная ссылка!',
+    },
   },
   trailer: {
     type: String,
     required: true,
+    validate: {
+      validator: (v) => validator.isURL(v),
+      message: 'В поле trailer введена некоректная ссылка!',
+    },
   },
   thumbnail: {
     type: String,
     required: true,
+    validate: {
+      validator: (v) => validator.isURL(v),
+      message: 'В поле thumbnail введена некоректная ссылка!',
+    },
   },
   owner: {
     type: mongoose.Schema.Types.ObjectId,
@@ -51,20 +64,5 @@ const movieSchema = new mongoose.Schema({
     required: true,
   },
 });
-
-movieSchema.path('image').validate((val) => {
-  const urlRegex = /(http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-/]))?/;
-  return urlRegex.test(val);
-}, 'Invalid URL.');
-
-movieSchema.path('trailer').validate((val) => {
-  const urlRegex = /(http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-/]))?/;
-  return urlRegex.test(val);
-}, 'Invalid URL.');
-
-movieSchema.path('thumbnail').validate((val) => {
-  const urlRegex = /(http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-/]))?/;
-  return urlRegex.test(val);
-}, 'Invalid URL.');
 
 module.exports = mongoose.model('movie', movieSchema);
