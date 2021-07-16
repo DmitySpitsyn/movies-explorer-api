@@ -34,7 +34,6 @@ app.get('/crash-test', () => {
 
 app.use(router);
 
-app.use(errorLogger);
 app.use(() => {
   throw new NotFoundError('Страница не найдена');
 });
@@ -59,5 +58,6 @@ app.use((err, req, res, next) => {
     });
   next(err);
 });
+app.use(errorLogger);
 
 app.listen(PORT, () => console.log(`App listening on port ${PORT}`));
