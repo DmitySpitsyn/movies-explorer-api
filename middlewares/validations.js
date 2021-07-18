@@ -5,12 +5,7 @@ module.exports.validateNewMovie = celebrate({
   body: Joi.object().keys({
     country: Joi.string().required(),
     director: Joi.string().required(),
-    duration: Joi.required().custom((value, helpers) => {
-      if (validator.isNumeric(value)) {
-        return value;
-      }
-      return helpers.message('Значение {#label} может состоять только из цифр!');
-    }),
+    duration: Joi.number().integer().required(),
     year: Joi.string().required().custom((value, helpers) => {
       if (validator.isNumeric(value)) {
         return value;
@@ -38,15 +33,12 @@ module.exports.validateNewMovie = celebrate({
       }
       return helpers.message('В {#label} введена некоректная ссылка!');
     }),
-    movieId: Joi.required().custom((value, helpers) => {
-      if (validator.isNumeric(value)) {
-        return value;
-      }
-      return helpers.message('Значение {#label} может состоять только из цифр!');
-    }),
+    movieId: Joi.number().integer().required(),
+
   }).messages({
     'string.empty': '{#label} Поле не может быть пустым',
     'any.required': '{#label} Не заполнено обязательное поле',
+    'number.base': '{#label} Поле не может быть пустым и должно состоять только из цифр',
   }),
 });
 
@@ -93,5 +85,13 @@ module.exports.validateLoginUser = celebrate({
   }).messages({
     'string.empty': '{#label} Поле не может быть пустым',
     'any.required': '{#label} Не заполнено обязательное поле',
+  }),
+});
+
+module.exports.validateDeleteMovie = celebrate({
+  params: Joi.object().keys({
+    movieId: Joi.string().hex().length(24).message('{#label} Введен некорректный id'),
+  }).messages({
+    'string.hex': '{#label} Передан некорректный id',
   }),
 });
