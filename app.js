@@ -9,7 +9,7 @@ const express = require('express');
 
 const { PORT = 3000 } = process.env;
 const app = express();
-app.use(cors({ origin: 'https://mesto-dvspicin.nomoredomains.monster', credentials: true }));
+app.use(cors({ origin: 'http://localhost:3000', credentials: true }));
 app.use(cookieParser());
 const bodyParser = require('body-parser');
 const NotFoundError = require('./errors/not-found-error');

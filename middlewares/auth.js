@@ -5,7 +5,6 @@ const { NODE_ENV, JWT_SECRET } = process.env;
 
 module.exports = (req, res, next) => {
   const { token } = req.cookies;
-
   if (!token) {
     throw new IncorrectLoginPassword('Необходима авторизация');
   }

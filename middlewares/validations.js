@@ -25,8 +25,8 @@ module.exports.validateNewMovie = celebrate({
       }
       return helpers.message('В {#label} введена некоректная ссылка!');
     }),
-    nameRU: Joi.string().required().regex(/^[А-Яа-я0-9Ёё ]+$/).message('Значение {#label} может состоять только из русских букв!'),
-    nameEN: Joi.string().required().regex(/^[A-Za-z0-9 ]+$/).message('Значение {#label} может состоять только из латинских букв!'),
+    nameRU: Joi.string().required().regex(/^[А-Яа-я0-9Ёё"«», ]+$/).message('Значение {#label} может состоять только из русских букв!'),
+    nameEN: Joi.string().required().regex(/^[A-Za-z0-9"«», ]+$/).message('Значение {#label} может состоять только из латинских букв!'),
     thumbnail: Joi.string().required().custom((value, helpers) => {
       if (validator.isURL(value)) {
         return value;

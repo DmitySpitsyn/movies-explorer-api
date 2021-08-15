@@ -30,12 +30,16 @@ module.exports.login = (req, res, next) => {
           maxAge: 3600000,
           httpOnly: false,
           sameSite: 'None',
-          secure: false,
+          secure: true,
         })
         .end();
     }).catch(() => {
       throw new IncorrectLoginPasswordError('Неверный логин или пароль');
     }).catch(next);
+};
+
+module.exports.logOutUser = (req, res) => {
+  res.clearCookie('token').send();
 };
 
 module.exports.createUser = (req, res, next) => {
@@ -65,10 +69,8 @@ module.exports.patchUser = (req, res, next) => {
     users.findOneAndUpdate({ _id: owner }, { $set: { name, email } },
       { runValidators: true, new: true })
       .then((item) => { res.send(item); }).catch((err) => {
-        if (err) {
-          if (err.name === 'MongoError' && err.code === 11000) {
-            throw new ConflictDataError('Пользователь с такой почтой уже зарегистрирован');
-          }
+        if (err.name === 'MongoError' && err.code === 11000) {
+          throw new ConflictDataError('Пользователь с такой почтой уже зарегистрирован');
         }
         throw err;
       }).catch(next);
