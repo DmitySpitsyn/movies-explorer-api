@@ -39,7 +39,12 @@ module.exports.login = (req, res, next) => {
 };
 
 module.exports.logOutUser = (req, res) => {
-  res.clearCookie('token').send();
+  res.clearCookie('token', {
+    maxAge: 3600000,
+    httpOnly: false,
+    sameSite: 'None',
+    secure: true,
+  }).send();
 };
 
 module.exports.createUser = (req, res, next) => {
