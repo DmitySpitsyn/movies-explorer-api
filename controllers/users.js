@@ -51,7 +51,9 @@ module.exports.createUser = (req, res, next) => {
   }))
     .then((user) => {
       users.findById(user._id)
-        .then((item) => res.send({ data: item }));
+        .then((item) => {
+          res.send({ data: item });
+        });
     })
     .catch((err) => {
       if (err.name === 'MongoError' && err.code === 11000) {

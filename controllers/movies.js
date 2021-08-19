@@ -4,7 +4,7 @@ const NotFoundError = require('../errors/not-found-error');
 const ForbiddenDataError = require('../errors/forbidden-data-error');
 
 module.exports.getMovies = (req, res, next) => {
-  movies.find({})
+  movies.find({ owner: req.user._id })
     .then((items) => res.send(items))
     .catch(next);
 };
